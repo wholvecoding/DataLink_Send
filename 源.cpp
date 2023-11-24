@@ -212,10 +212,9 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 			bb[1] = 0;
 			char buf[22];
 			
-			wsprintf(buf, "%02XH,%c", (unsigned char)bb[0], bb[0]);
+			wsprintf(buf, "%02XH", (unsigned char)bb[0], bb[0]);
 			Puts(hW, MEMO1, buf);				//显示，物理层收到的信息
-			//getsCrc(hW, ANSWER, buf1);
-			//MessageBox(0,bb,"(FD_READ)",0);
+		
 			break;
 		}
 		break;
