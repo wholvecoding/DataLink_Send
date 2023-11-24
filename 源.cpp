@@ -131,7 +131,9 @@ void Puts(HWND hW, int ID_EDIT, char* str)
 WSADATA ws;
 SOCKET Cs1, Cs2;
 struct sockaddr_in Cs1A, Cs2A;
+uint8_t x = 0x00;
 char aa[200];
+char mysend;
 char bb[200];
 char cc[200];
 int d, i;
@@ -146,6 +148,7 @@ int SendBufLeng;			//报文长度
 int Sendi;					//数据帧发送计数
 BYTE mywlcSend(BYTE c);		//物理层：发送一个字节
 BYTE wlcRev();				//物理层：接收一个字节
+char SetCheck(char& c);     //偶校验：针对发送数据
 //--------------------------------------------------------------
 //消息处理
 LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
@@ -194,7 +197,7 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 		CreateWindow("STATIC", "发送端物理层接收的消息",
 			WS_VISIBLE | WS_CHILD,
 			260, 100, 200, 20, hW, NULL, hInst, NULL);
-		CreateMemo(const_cast<char*>(" shoudaol1"), 260, 150, 200, 220, MEMO1, hW, hInst);
+		CreateMemo(const_cast<char*>(""), 260, 150, 200, 220, MEMO1, hW, hInst);
 		
 		
 		break;
@@ -226,17 +229,25 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 			GetDlgItemText(hW, EDIT1, aa, sizeof(aa));		//从单行编辑框得到报文
 			
 			char xx[20];
+			
 			SendBufLeng = strlen(aa);						//求出报文长度
 			for (Sendi = 0; Sendi < SendBufLeng; Sendi++)		//发送报文
-			{
-				cc[0]=mywlcSend(aa[Sendi]);					//物理层：发送一个字节
-				wsprintf(xx, "%02XH", (unsigned char)cc[0]); //将发送的消息(ascii)转变为十六进制，存放到xx
-				Puts(hW, MEMO2, xx);						//将xx定向到MEMO2中，以在文本框显示出
+			{  
+				
+				aa[Sendi] = (aa[Sendi] & 0x0F) + x;			//将发送序号加入
+				if (x != 0x70)x += 0x10;                    //控制序号变化
+				else x = 0x00;								//序号只能有8种，超过后重置
+				mysend = SetCheck(aa[Sendi]);               //将待发送的数据进行偶校验，并在最左位补校验位
+				mywlcSend(mysend);					//物理层：发送一个字节
+				wsprintf(xx, "%02XH", (unsigned char)mysend); //将发送的消息(ascii码)转变为十六进制，存放到xx.消息目前只能是单字节（）
+				Puts(hW, MEMO2, xx);						//将xx定向到MEMO2中，在文本框显示出
 			}
 			break;
+
 		case BUTTON2:									//清除信息框内容
 			SetDlgItemText(hW, MEMO1, (LPSTR)"");
 			SetDlgItemText(hW, MEMO2, (LPSTR)" ");
+			x = 0x00;
 			break;
 		/*case BUTTON3:
 			SetDlgItemText(hW, ANSWER, (LPSTR)"");
@@ -263,5 +274,19 @@ BYTE wlcRev()			//物理层：接收一个字节
 	d = recvfrom(Cs1, b, 1, 0, (struct sockaddr*)&Cs2A, &d);
 	return b[0];
 }
+char SetCheck(char& c) //C为一个字节
+{
+	int i, sum = 0;
+	BYTE x = 0x01;
+	for (i = 0; i < 7; i++)
+	{
+		if (c & x) sum++;
+		x = x << 1;
+	}
+	if (sum % 2) c = c | 0x80;
+	else c = c & 0x7F;
+	return c;
+}
+
 
 //--------------------------------------------------------------
