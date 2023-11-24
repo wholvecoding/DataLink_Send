@@ -184,6 +184,7 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 		CreateButton(const_cast <char*>("send"), 250, 20, 50, 60, BUTTON1, hW, hInst);
 		CreateButton(const_cast <char*>("Reset"), 350, 20, 50, 60, BUTTON2, hW, hInst);
 		CreateButton(const_cast <char*>("生成校验码"), 450, 20, 100, 60, BUTTON3, hW, hInst);
+		//物理层发送的消息提示
 		CreateWindow("STATIC", "发送端物理层发送的信息",
 			WS_VISIBLE | WS_CHILD,
 			50, 100, 200, 20, hW, NULL, hInst, NULL);
@@ -217,11 +218,16 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 	case WM_COMMAND:
 		switch (wP)
 		{
-		case BUTTON1:									// "Send" 按钮事件触发	
+		case BUTTON1:		
+			
+			
+			// "Send" 按钮事件触发	
 			GetDlgItemText(hW, EDIT1, aa, sizeof(aa));		//从单行编辑框得到报文
+			Puts(hW, MEMO2, aa);                            //显示发送的信息
 			SendBufLeng = strlen(aa);						//求出报文长度
 			for (Sendi = 0; Sendi < SendBufLeng; Sendi++)		//发送报文
 				wlcSend(aa[Sendi]);						//物理层：发送一个字节
+			
 			break;
 		case BUTTON2:									//清除信息框内容
 			SetDlgItemText(hW, MEMO1, (LPSTR)"");
