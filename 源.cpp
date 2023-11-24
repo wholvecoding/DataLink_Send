@@ -133,6 +133,7 @@ SOCKET Cs1, Cs2;
 struct sockaddr_in Cs1A, Cs2A;
 char aa[200];
 char bb[200];
+char cc[200];
 int d, i;
 #define Cs2Port 7777		//远程端口
 #define Cs1Port 6666		//本地端口
@@ -143,7 +144,7 @@ int d, i;
 //你可以在这里定义变量
 int SendBufLeng;			//报文长度
 int Sendi;					//数据帧发送计数
-void wlcSend(BYTE c);		//物理层：发送一个字节
+BYTE mywlcSend(BYTE c);		//物理层：发送一个字节
 BYTE wlcRev();				//物理层：接收一个字节
 //--------------------------------------------------------------
 //消息处理
@@ -223,11 +224,15 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 			
 			// "Send" 按钮事件触发	
 			GetDlgItemText(hW, EDIT1, aa, sizeof(aa));		//从单行编辑框得到报文
-			Puts(hW, MEMO2, aa);                            //显示发送的信息
+			
+			char xx[20];
 			SendBufLeng = strlen(aa);						//求出报文长度
 			for (Sendi = 0; Sendi < SendBufLeng; Sendi++)		//发送报文
-				wlcSend(aa[Sendi]);						//物理层：发送一个字节
-			
+			{
+				cc[0]=mywlcSend(aa[Sendi]);					//物理层：发送一个字节
+				wsprintf(xx, "%02XH", (unsigned char)cc[0]); //将发送的消息(ascii)转变为十六进制，存放到xx
+				Puts(hW, MEMO2, xx);						//将xx定向到MEMO2中，以在文本框显示出
+			}
 			break;
 		case BUTTON2:									//清除信息框内容
 			SetDlgItemText(hW, MEMO1, (LPSTR)"");
@@ -242,12 +247,13 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 	return DefWindowProc(hW, msg, wP, lP);
 }
 //--------------------------------------------------------------
-void wlcSend(BYTE c)	//物理层：发送一个字节
+BYTE mywlcSend(BYTE c)	//物理层：发送一个字节
 {
 	char a[2];
 	a[0] = c; a[1] = 0;
 	d = sizeof(Cs2A);
 	sendto(Cs1, a, 1, 0, (struct sockaddr*)&Cs2A, d);
+	return  c;
 }
 //--------------------------------------------------------------
 BYTE wlcRev()			//物理层：接收一个字节
