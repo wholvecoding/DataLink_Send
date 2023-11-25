@@ -163,6 +163,7 @@ LRESULT CALLBACK WndProc(HWND hW, UINT msg, WPARAM wP, LPARAM lP)
 		WSACleanup();
 		PostQuitMessage(0);
 		break;
+
 	case WM_CREATE:
 		WSAStartup(0x0101, &::ws);
 		Cs1 = socket(AF_INET, SOCK_DGRAM, 0);
