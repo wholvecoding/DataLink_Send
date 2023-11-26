@@ -4,7 +4,8 @@ dataLink_send.exe
 ## 出现的问题
 ### 1.出现烫烫
 
-![Uploading image.png…]()
+![image](https://github.com/wholvecoding/DataLink_Send/assets/126675746/8d047e26-5cb6-4233-9737-65aef30a43e0)
+
 
 
 #### 出现原因：
